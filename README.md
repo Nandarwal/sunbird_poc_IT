@@ -334,7 +334,7 @@ If all commands work successfully, your system is ready to run the SB Intern Ass
 
 ```bash
 git clone <repository-url>
-cd sb-intern-assessment-poc
+cd sunbird_poc_IT
 ```
 
 ### 2. Create Virtual Environment
