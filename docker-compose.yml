@@ -1,0 +1,23 @@
+version: "3.8"
+
+services:
+  poc-db:
+    image: postgres:15-alpine
+    container_name: sb-quiz-db
+    environment:
+      POSTGRES_USER: quiz_admin
+      POSTGRES_PASSWORD: SecretPassword123
+      POSTGRES_DB: intern_assessment
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  poc-cache:
+    image: redis:7-alpine
+    container_name: sb-quiz-cache
+    ports:
+      - "6379:6379"
+
+volumes:
+  pgdata:

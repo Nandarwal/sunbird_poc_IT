@@ -1,0 +1,9 @@
+_format_version: "3.0"
+
+services:
+  - name: mock-service
+    url: http://example.com
+    routes:
+      - name: mock-route
+        paths:
+          - /

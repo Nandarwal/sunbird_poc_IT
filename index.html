@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SB Intern Assessment POC</title>
+    <!-- Import Sunbird inQuiry QuML Player asset files via CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@project-sunbird/sunbird-quml-player-web-component@1.4.0/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/@project-sunbird/sunbird-quml-player-web-component@1.4.0/sunbird-quml-player.js"></script>
+    <style>
+        body { font-family: sans-serif; background: #f4f6f9; padding: 40px; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body>
+<input
+    type="text"
+    id="phone"
+    placeholder="Enter Phone Number">
+<input
+    type="text"
+    id="userid"
+    placeholder="Enter User ID">
+
+<select id="quizSelector">
+    <option value="">Select Quiz</option>
+    <option value="it_policy.json">
+        IT Policy Implementation - Pre Assessment
+    </option>
+
+    <!-- <option value="cloud_ops.json">
+        Cloud Operations Basics
+    </option>
+    <option value="linux_basics.json">
+        Linux Basics
+    </option>
+    <option value="database_basics.json">
+        Database Basics
+    </option>
+    <option value="networking.json">
+        Networking
+    </option>
+    <option value="sunbird_intro.json">
+        Sunbird OS Basics
+    </option>-->
+</select> 
+
+<button onclick="loadQuiz()">
+    Start Quiz
+</button>
+
+<div class="container">
+    <h2>IT Policy Implementation - Pre Assessment</h2>
+    <hr>
+    
+    <div id="quiz"></div>
+
+<br>
+
+<div id="assessmentActions" style="display:none;">
+<h3>Remarks / Observations</h3>
+
+<textarea
+    id="remarks"
+    rows="4"
+    cols="60"
+    placeholder="Enter remarks here">
+</textarea>
+
+<br><br>
+
+<button onclick="submitQuiz()">Submit Quiz</button>
+</div>
+
+<div id="result" style="margin-top:20px;font-weight:bold;"></div>
+</div>
+
+<script>
+let quizData;
+
+function loadQuiz() {
+  const file = document.getElementById("quizSelector").value;
+
+  if (!file) {
+    alert("Please select an assessment.");
+    return;
+  }
+
+  fetch(`./quizzes/${file}`)
+    .then(res => res.json())
+    .then(data => {
+      quizData = data;
+
+      document.getElementById("quiz").innerHTML = "";
+      document.getElementById("assessmentActions").style.display = "block";
+
+      data.questions.forEach((q, index) => {
+        let html = `
+          <div style="margin-bottom:25px;">
+            <h3>Q${index + 1}. ${q.body}</h3>
+        `;
+
+      q.options.forEach(opt => {
+  html += `
+    <label>
+      <input
+        type="radio"
+        name="${q.id}"
+        value="${opt.compliant}">
+      ${opt.label}
+    </label><br>
+  `;
+});
+
+        html += `</div>`;
+        document.getElementById("quiz").innerHTML += html;
+      });
+    });
+}
+
+
+function submitQuiz() {
+
+   if (!quizData) {
+        alert("Please load an assessment first.");
+        return;
+    }
+
+    const phone =
+    document.getElementById("phone").value.trim();
+
+const userId =
+    document.getElementById("userid").value.trim();
+
+if (!phone || !userId) {
+    alert("Please enter Phone Number and User ID.");
+    return;
+}
+
+    let yesCount = 0;
+    const answers = {};
+
+    quizData.questions.forEach(q => {
+
+        const selected =
+            document.querySelector(
+                `input[name="${q.id}"]:checked`
+            );
+
+        if (selected) {
+
+            const value =
+                selected.value === "true";
+
+            answers[q.id] = value;
+
+            if (value) {
+                yesCount++;
+            }
+        }
+    });
+
+    if (
+        Object.keys(answers).length !==
+        quizData.questions.length
+    ) {
+        alert("Please answer all questions.");
+        return;
+    }
+
+    const percentage =
+        (yesCount / quizData.questions.length) * 100;
+
+    document.getElementById("result").innerHTML =
+        `Compliance Score: ${percentage}%`;
+  
+        const payload = {
+    user_id: document.getElementById("userid").value,
+    phone_number: document.getElementById("phone").value,
+
+    ...answers,
+
+    compliance_percentage: percentage,
+
+    remarks: document.getElementById("remarks").value
+};
+
+  console.log("Sending data to Flask...");
+
+  fetch('http://127.0.0.1:5000/submit_assessment', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+})
+.then(response => {
+    if (!response.ok) {
+        throw new Error("Server error");
+    }
+    return response.json();
+})
+.then(data => {
+    console.log('Saved:', data);
+    alert('Assessment saved successfully!');
+})
+.catch(error => {
+    console.error(error);
+    alert('Could not save assessment.');
+});
+}
+  
+ 
+
+</script>
+</body>
+</html>
