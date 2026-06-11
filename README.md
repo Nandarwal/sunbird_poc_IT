@@ -168,6 +168,165 @@ docker compose version
 ```
 
 ---
+## Installing Prerequisites on Windows
+
+### 1. Install Python
+
+#### Step 1: Download Python
+
+Visit:
+
+https://www.python.org/downloads/
+
+Download the latest Python 3.10+ installer for Windows.
+
+#### Step 2: Run Installer
+
+When the installer opens:
+
+✅ Check **"Add Python to PATH"**
+
+Then click:
+
+```text
+Install Now
+```
+
+#### Step 3: Verify Installation
+
+Open Command Prompt and run:
+
+```bash
+python --version
+```
+
+Expected output:
+
+```text
+Python 3.x.x
+```
+
+Also verify pip:
+
+```bash
+pip --version
+```
+
+---
+
+### 2. Install Docker Desktop
+
+#### Step 1: Download Docker Desktop
+
+Visit:
+
+https://www.docker.com/products/docker-desktop/
+
+Download Docker Desktop for Windows.
+
+#### Step 2: Install Docker Desktop
+
+Run the installer and keep the default settings.
+
+When prompted:
+
+✅ Enable WSL 2 Integration
+
+Docker Desktop may ask to install WSL 2 automatically.
+
+#### Step 3: Restart Computer
+
+Restart Windows after installation.
+
+#### Step 4: Start Docker Desktop
+
+Launch Docker Desktop and wait until it shows:
+
+```text
+Docker Desktop is running
+```
+
+#### Step 5: Verify Installation
+
+Open Command Prompt and run:
+
+```bash
+docker --version
+```
+
+Example output:
+
+```text
+Docker version 28.x.x
+```
+
+---
+
+### 3. Install WSL 2 (If Not Already Installed)
+
+Open PowerShell as Administrator and run:
+
+```powershell
+wsl --install
+```
+
+Restart your computer after installation.
+
+Verify:
+
+```powershell
+wsl --status
+```
+
+Expected output should show:
+
+```text
+Default Version: 2
+```
+
+---
+
+### 4. Verify Docker Compose
+
+Docker Compose is included with modern Docker Desktop installations.
+
+Check:
+
+```bash
+docker compose version
+```
+
+Expected output:
+
+```text
+Docker Compose version v2.x.x
+```
+
+---
+
+### 5. Verify Everything
+
+Run:
+
+```bash
+python --version
+docker --version
+docker compose version
+```
+
+You should see version numbers for all three commands.
+
+Example:
+
+```text
+Python 3.12.3
+Docker version 28.1.1
+Docker Compose version v2.36.0
+```
+
+If all commands work successfully, your system is ready to run the SB Intern Assessment POC.
+
+---
 
 ## Installation
 
