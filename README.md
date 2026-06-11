@@ -1,109 +1,200 @@
-# Sunbird Assessment POC
+# SB Intern Assessment POC
 
-A simple assessment platform inspired by Sunbird architecture. Users enter their phone number, select a quiz, attempt the quiz, and their score is stored in PostgreSQL.
+## Overview
+
+SB Intern Assessment POC is a lightweight assessment platform built to demonstrate how compliance and assessment questionnaires can be administered, scored, and stored using a simple web application.
+
+The application allows an assessor to:
+
+- Select an assessment
+- Answer compliance-related questions
+- Automatically calculate a compliance score
+- Record observations and remarks
+- Store assessment results in PostgreSQL
+- Update previously submitted assessments for the same user
+
+This project was developed as a Proof of Concept (POC) inspired by assessment workflows commonly used within Sunbird-based ecosystems.
 
 ---
 
-## Features
+## Architecture
 
-* Multiple quiz support
-* Phone number based quiz attempts
-* Dynamic quiz loading from JSON files
-* Flask backend API
-* PostgreSQL database storage
-* Docker-based infrastructure
-* Easily extensible architecture
+The solution consists of three main components:
+
+### Frontend
+
+- HTML
+- JavaScript
+- Dynamic quiz rendering
+- Compliance score calculation
+
+### Backend
+
+- Flask REST API
+- Handles assessment submission
+- Persists results into PostgreSQL
+
+### Database
+
+- PostgreSQL
+- Stores assessment responses
+- Maintains user assessment history
+
+### Supporting Services
+
+- Redis (available for future caching/session requirements)
+- Kong API Gateway configuration (placeholder)
 
 ---
 
 ## Project Structure
 
 ```text
-sunbird-poc/
-│
-├── quizzes/
-│   ├── cloud_ops.json
-│   ├── linux_basics.json
-│   ├── networking.json
-│   ├── database_basics.json
-│   └── sunbird_intro.json
+project-root/
 │
 ├── app.py
 ├── index.html
 ├── docker-compose.yml
 ├── kong.yml
 ├── requirements.txt
+│
+├── quizzes/
+│   ├── it_policy.json
+│   ├── cloud_ops.json
+│   ├── linux_basics.json
+│   └── ...
+│
 └── README.md
+```
+
+---
+
+## File Descriptions
+
+### app.py
+
+Flask backend application.
+
+**Responsibilities**
+
+- Exposes assessment submission endpoint
+- Accepts JSON payloads
+- Inserts assessment data into PostgreSQL
+- Updates existing records if a user submits again
+- Returns success/failure responses
+
+**Endpoint**
+
+```http
+POST /submit_assessment
+```
+
+### index.html
+
+Frontend assessment application.
+
+**Features**
+
+- User ID capture
+- Phone number capture
+- Assessment selection
+- Dynamic question rendering
+- Compliance percentage calculation
+- Remarks capture
+- Submission to Flask API
+
+### docker-compose.yml
+
+Starts required infrastructure services.
+
+#### PostgreSQL
+
+- Container: `sb-quiz-db`
+- Database: `intern_assessment`
+- User: `quiz_admin`
+- Port: `5432`
+
+#### Redis
+
+- Container: `sb-quiz-cache`
+- Port: `6379`
+
+Currently included for future extensibility.
+
+### kong.yml
+
+Placeholder Kong Gateway configuration.
+
+Can later be extended for:
+
+- Authentication
+- Rate limiting
+- API routing
+- Monitoring
+- Logging
+
+### requirements.txt
+
+Python dependencies:
+
+```text
+Flask
+Flask-Cors
+psycopg2-binary
 ```
 
 ---
 
 ## Prerequisites
 
-Before running the project, ensure the following are installed:
+### Python
 
-### Python 3.10+
-
-Verify installation:
+Python 3.10+
 
 ```bash
-python3 --version
+python --version
 ```
 
-### Docker Desktop
-
-Install Docker Desktop and ensure it is running.
-
-Verify installation:
+### Docker
 
 ```bash
 docker --version
+```
+
+### Docker Compose
+
+```bash
 docker compose version
 ```
 
 ---
 
-## Step 1: Clone the Repository
+## Installation
+
+### 1. Clone Repository
 
 ```bash
-git clone https://github.com/Nandarwal/sunbird_os_poc.git
+git clone <repository-url>
+cd sb-intern-assessment-poc
 ```
 
-Move into the project directory:
+### 2. Create Virtual Environment
 
-```bash
-cd sunbird-poc
-```
-
----
-
-## Step 2: Create a Virtual Environment
-
-Create a Python virtual environment:
+#### Mac/Linux
 
 ```bash
 python3 -m venv venv
-```
-
-Activate it:
-
-### macOS/Linux
-
-```bash
 source venv/bin/activate
 ```
 
-### Windows
+#### Windows
 
 ```bash
+python -m venv venv
 venv\Scripts\activate
 ```
 
----
-
-## Step 3: Install Python Dependencies
-
-Install required packages:
+### 3. Install Dependencies
 
 ```bash
 pip install -r requirements.txt
@@ -111,29 +202,30 @@ pip install -r requirements.txt
 
 ---
 
-## Step 4: Start PostgreSQL Using Docker
+## Starting Infrastructure
 
-Start the database container:
+Start PostgreSQL and Redis:
 
 ```bash
 docker compose up -d
 ```
 
-Verify the container is running:
+Verify containers:
 
 ```bash
 docker ps
 ```
 
-You should see:
+Expected:
 
 ```text
 sb-quiz-db
+sb-quiz-cache
 ```
 
 ---
 
-## Step 5: Create Database Table
+## Database Setup
 
 Connect to PostgreSQL:
 
@@ -141,145 +233,224 @@ Connect to PostgreSQL:
 docker exec -it sb-quiz-db psql -U quiz_admin -d intern_assessment
 ```
 
-Create the table:
+Create the assessment table:
 
 ```sql
-CREATE TABLE IF NOT EXISTS quiz_results (
+CREATE TABLE assessment_results (
     id SERIAL PRIMARY KEY,
+
     phone_number VARCHAR(20),
-    quiz_id VARCHAR(100),
-    quiz_name VARCHAR(200),
-    score INTEGER,
-    total_questions INTEGER,
+
+    user_id VARCHAR(100) UNIQUE,
+
+    q1 BOOLEAN,
+    q2 BOOLEAN,
+    q3 BOOLEAN,
+    q4 BOOLEAN,
+    q5 BOOLEAN,
+    q6 BOOLEAN,
+    q7 BOOLEAN,
+    q8 BOOLEAN,
+    q9 BOOLEAN,
+    q10 BOOLEAN,
+
+    compliance_percentage NUMERIC,
+
+    remarks TEXT,
+
     submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 ```
 
-Verify:
-
-```sql
-\dt
-```
-
-Exit PostgreSQL:
-
-```sql
-\q
-```
-
 ---
 
-## Step 6: Start the Flask Backend
-
-Run:
+## Running the Backend
 
 ```bash
 python app.py
 ```
 
-You should see:
+Expected output:
 
 ```text
-Running on http://127.0.0.1:5000
+* Running on http://127.0.0.1:5000
 ```
-
-Keep this terminal open.
 
 ---
 
-## Step 7: Start the Frontend
+## Running the Frontend
 
-Open a second terminal window.
+### Option 1: Open Directly
 
-Navigate to the project folder:
+Open `index.html` in your browser.
 
-```bash
-cd sunbird-poc
-```
-
-Start a local web server:
+### Option 2: Serve Locally
 
 ```bash
 python -m http.server 8000
 ```
 
----
-
-## Step 8: Open the Application
-
-Open your browser and visit:
+Open:
 
 ```text
-http://localhost:8000/index.html
+http://localhost:8000
 ```
 
 ---
 
-## Step 9: Use the Application
+## Assessment Workflow
 
-1. Enter your phone number
-2. Select a quiz
-3. Click "Start Quiz"
-4. Attempt the quiz
-5. Click "Submit Quiz"
-6. View your score
-
----
-
-## Step 10: Verify Results in PostgreSQL
-
-Open a new terminal:
-
-```bash
-docker exec -it sb-quiz-db psql -U quiz_admin -d intern_assessment
-```
-
-Run:
-
-```sql
-SELECT * FROM quiz_results;
-```
-
-You should see stored quiz attempts including:
-
-* Phone Number
-* Quiz Name
-* Score
-* Submission Timestamp
+1. Enter Phone Number
+2. Enter User ID
+3. Select Assessment
+4. Click **Start Quiz**
+5. Answer all questions
+6. Add remarks
+7. Click **Submit Quiz**
+8. Compliance score is calculated automatically
+9. Results are stored in PostgreSQL
 
 ---
 
-## Stopping the Application
+## Assessment Scoring Logic
 
-Stop the database container:
+Each answer is mapped to a compliance value:
 
-```bash
-docker compose down
+```json
+{
+  "label": "Yes",
+  "compliant": true
+}
 ```
 
-Deactivate the Python virtual environment:
+Formula:
 
-```bash
-deactivate
+```text
+(Number of compliant answers / Total questions) × 100
+```
+
+Example:
+
+```text
+8 compliant answers out of 10
+Compliance Score = 80%
 ```
 
 ---
 
-## Tech Stack
+## API Reference
 
-* Frontend: HTML, JavaScript
-* Backend: Flask
-* Database: PostgreSQL
-* Infrastructure: Docker
-* Optional Components: Redis, Kong Gateway
+### Submit Assessment
+
+**Request**
+
+```http
+POST /submit_assessment
+Content-Type: application/json
+```
+
+**Example Payload**
+
+```json
+{
+  "phone_number": "9876543210",
+  "user_id": "USER001",
+  "q1": true,
+  "q2": false,
+  "q3": true,
+  "q4": true,
+  "q5": true,
+  "q6": false,
+  "q7": true,
+  "q8": true,
+  "q9": false,
+  "q10": true,
+  "compliance_percentage": 70,
+  "remarks": "User requires additional training."
+}
+```
+
+**Success Response**
+
+```json
+{
+  "success": true,
+  "message": "Assessment saved successfully"
+}
+```
+
+---
+
+## Adding New Assessments
+
+Create a new JSON file inside:
+
+```text
+quizzes/
+```
+
+Example:
+
+```text
+quizzes/networking.json
+```
+
+Sample format:
+
+```json
+{
+  "questions": [
+    {
+      "id": "q1",
+      "body": "Is firewall configured?",
+      "options": [
+        {
+          "label": "Yes",
+          "compliant": true
+        },
+        {
+          "label": "No",
+          "compliant": false
+        }
+      ]
+    }
+  ]
+}
+```
+
+Then add the assessment to the dropdown in `index.html`.
 
 ---
 
 ## Future Enhancements
 
-* Backend score calculation
-* Leaderboard support
-* User attempt history
-* Quiz analytics dashboard
-* Kong API Gateway integration
-* Authentication and authorization
+- User authentication and authorization
+- Assessment history dashboard
+- CSV export functionality
+- Sunbird integration
+- Redis caching implementation
+- Kong API Gateway integration
+- Role-based access control
+- Analytics and reporting dashboard
+- Mobile-responsive UI
+- Assessment templates and management
+
+---
+
+## Technology Stack
+
+| Layer | Technology |
+|---------|------------|
+| Frontend | HTML, JavaScript |
+| Backend | Flask |
+| Database | PostgreSQL |
+| Cache | Redis |
+| Containerization | Docker |
+| API Gateway | Kong |
+| Assessment Framework | Sunbird-inspired QuML Structure |
+
+---
+
+## License
+
+This project is intended for educational, learning, and proof-of-concept purposes. It may be modified and extended as required.
