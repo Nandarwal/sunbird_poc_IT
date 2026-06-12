@@ -333,7 +333,7 @@ If all commands work successfully, your system is ready to run the SB Intern Ass
 ### 1. Clone Repository
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/Nandarwal/sunbird_poc_IT
 cd sunbird_poc_IT
 ```
 
